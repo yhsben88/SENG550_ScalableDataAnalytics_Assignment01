@@ -5,26 +5,21 @@ This module contains functions for adding and updating records in the PostgreSQL
 It serves as the data access layer for customer, order, and delivery records.
 
 Functions:
-    add_customer(conn, cur, name, email, phone, address) -> cursor | None
-    add_order(conn, cur, customer_id, order_date, total_amount, product_id, product_category, product_name) -> cursor | None
-    add_delivery(conn, cur, order_id, delivery_date, status) -> cursor | None
-    update_delivery_status(conn, cur, delivery_id, new_status) -> cursor | int | None
+    add_customer(conn, cur, name, email, phone, address) -> int | None
+    add_order(conn, cur, customer_id, order_date, total_amount, product_id, product_category, product_name) -> int | None
+    add_delivery(conn, cur, order_id, delivery_date, status) -> int | None
+    update_delivery_status(conn, cur, delivery_id, new_status) -> bool
 
 Notes:
-    - On success, functions return the active cursor positioned after the executed query.
-    - On error, functions return None (and roll back the transaction).
-    - `update_delivery_status` may also return the integer 1 if no matching delivery record is found.
-
-Appendix:
-    psycopg2:
-        1. conn (connection): Connection object that establishes a connection with the database.
-        2. cur (cursor): Cursor object derived from conn to execute SQL queries.
+    - On success, add_* functions return the ID of the newly inserted row.
+    - update_delivery_status returns True on success, False if the delivery ID was not found or an error occurred.
+    - All functions commit the transaction on success, rollback on failure.
 """
 
 from psycopg2.extensions import connection, cursor
 
 
-def add_customer(conn: connection, cur: cursor, name: str, email: str, phone: str, address: str) -> cursor | None:
+def add_customer(conn: connection, cur: cursor, name: str, email: str, phone: str, address: str) -> int | None:
     """
     Insert a new customer record into the database.
 
@@ -37,23 +32,27 @@ def add_customer(conn: connection, cur: cursor, name: str, email: str, phone: st
         address (str): Customer's street address.
 
     Returns:
-        cursor | None: The cursor after successful execution, or None if an error occurred.
+        int | None: ID of the newly added customer, or None if an error occurred.
     """
-    placeholders = ', '.join(['%s'] * 4)
-    query = f"INSERT INTO customers (name, email, phone, address) VALUES ({placeholders})"
+    query = """
+        INSERT INTO customers (name, email, phone, address)
+        VALUES (%s, %s, %s, %s)
+        RETURNING customer_id
+    """
     values = [name, email, phone, address]
     try:
         cur.execute(query, values)
+        customer_id = cur.fetchone()[0]
         conn.commit()
-        return cur
+        return customer_id
     except Exception as e:
         print(f"❌ Error inserting into customers: {e}")
         conn.rollback()
-        return
+        return None
 
 
 def add_order(conn: connection, cur: cursor, customer_id: int, order_date: str, total_amount: float,
-              product_id: int, product_category: str, product_name: str) -> cursor | None:
+              product_id: int, product_category: str, product_name: str) -> int | None:
     """
     Insert a new order record into the database.
 
@@ -68,24 +67,26 @@ def add_order(conn: connection, cur: cursor, customer_id: int, order_date: str, 
         product_name (str): Descriptive name of the product.
 
     Returns:
-        cursor | None: The cursor after successful execution, or None if an error occurred.
+        int | None: ID of the newly added order, or None if an error occurred.
     """
     query = """
         INSERT INTO orders (customer_id, order_date, total_amount, product_id, product_category, product_name)
         VALUES (%s, %s, %s, %s, %s, %s)
+        RETURNING order_id
     """
     values = (customer_id, order_date, total_amount, product_id, product_category, product_name)
     try:
         cur.execute(query, values)
+        order_id = cur.fetchone()[0]
         conn.commit()
-        return cur
+        return order_id
     except Exception as e:
         print(f"❌ Error inserting into orders: {e}")
         conn.rollback()
-        return
+        return None
 
 
-def add_delivery(conn: connection, cur: cursor, order_id: int, delivery_date: str, status: str) -> cursor | None:
+def add_delivery(conn: connection, cur: cursor, order_id: int, delivery_date: str, status: str) -> int | None:
     """
     Insert a new delivery record into the database.
 
@@ -97,24 +98,26 @@ def add_delivery(conn: connection, cur: cursor, order_id: int, delivery_date: st
         status (str): Current status of the delivery (e.g., 'Pending', 'Shipped', 'Delivered').
 
     Returns:
-        cursor | None: The cursor after successful execution, or None if an error occurred.
+        int | None: ID of the newly added delivery, or None if an error occurred.
     """
     query = """
-        INSERT INTO deliveries (order_id, delivery_date, status) 
+        INSERT INTO deliveries (order_id, delivery_date, status)
         VALUES (%s, %s, %s)
+        RETURNING delivery_id
     """
     values = (order_id, delivery_date, status)
     try:
         cur.execute(query, values)
+        delivery_id = cur.fetchone()[0]
         conn.commit()
-        return cur
+        return delivery_id
     except Exception as e:
         print(f"❌ Error inserting into deliveries: {e}")
         conn.rollback()
-        return
+        return None
 
 
-def update_delivery_status(conn: connection, cur: cursor, delivery_id: int, new_status: str) -> cursor | int | None:
+def update_delivery_status(conn: connection, cur: cursor, delivery_id: int, new_status: str) -> bool:
     """
     Update the status of an existing delivery in the database.
 
@@ -125,10 +128,7 @@ def update_delivery_status(conn: connection, cur: cursor, delivery_id: int, new_
         new_status (str): Updated status value (e.g., 'Delivered', 'Cancelled').
 
     Returns:
-        cursor | int | None:
-            - cursor: The cursor after a successful update.
-            - int: The value 1 if no delivery record with the given ID was found.
-            - None: If an error occurred.
+        bool: True if the update succeeded, False otherwise (e.g., delivery ID not found or error).
     """
     query = """
         UPDATE deliveries
@@ -141,10 +141,10 @@ def update_delivery_status(conn: connection, cur: cursor, delivery_id: int, new_
         if cur.rowcount == 0:
             print(f"⚠️ No delivery found with ID {delivery_id}")
             conn.rollback()
-            return 1
+            return False
         conn.commit()
-        return cur
+        return True
     except Exception as e:
         print(f"❌ Error updating delivery status: {e}")
         conn.rollback()
-        return
+        return False

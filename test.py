@@ -42,24 +42,24 @@ def perform_test(conn: connection, cur: cursor, active_step_number: int = 0) -> 
     selected_test = test_step_map.get(active_step_number, None)
     if selected_test:
         print(f"Performing operation: {selected_test}")
-    exit_code = -1
 
     # Execute the selected test operation
     match selected_test:
         case "add_test_customer":
-            exit_code = queries.add_customer(conn, cur, "Test Subject", "test@gmail.com", "999-9999", "99 Fake Road Fake Direction")
+            cur = queries.add_customer(conn, cur, "Test Subject", "test@gmail.com", "999-9999", "99 Fake Road Fake Direction")
 
         case "add_test_order":
-            exit_code = queries.add_order(conn, cur, 1, "2020-12-14", 120.50, 101, "Test", "Test Product")
+            cur = queries.add_order(conn, cur, 1, "2020-12-14", 120.50, 101, "Test", "Test Product")
 
         case "add_test_delivery":
-            exit_code = queries.add_delivery(conn, cur, 1, "1890-09-05", "Testing")
+            cur = queries.add_delivery(conn, cur, 1, "1890-09-05", "Testing")
 
         case "update_delivery_status":
-            exit_code = queries.update_delivery_status(conn, cur, 1, "Delivered")
+            cur = queries.update_delivery_status(conn, cur, 1, "Delivered")
 
         case _:
             print("⚠️ No valid test step selected")
 
-    print(f"Exit with code: {exit_code}")
-    return exit_code
+    if cur:
+        print(f"✅ Exit with test completed")
+    return 

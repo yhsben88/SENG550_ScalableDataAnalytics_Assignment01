@@ -95,9 +95,10 @@ if __name__ == "__main__":
                     print("✅ Updated delivery 3 status to Delivered")
                 else: 
                     print(f"❌ Error Updating delivery 3 status to Delivered")
-
+                    sys.exit(1)
 
                 """Successful Execution"""
+                conn.commit()
                 exit(0)
     except psycopg2.Error as e:
         print(f"❌ Error connecting to PostgreSQL: {e}")

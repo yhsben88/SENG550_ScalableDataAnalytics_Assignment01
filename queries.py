@@ -43,11 +43,9 @@ def add_customer(conn: connection, cur: cursor, name: str, email: str, phone: st
     try:
         cur.execute(query, values)
         customer_id = cur.fetchone()[0]
-        conn.commit()
         return customer_id
     except Exception as e:
         print(f"❌ Error inserting into customers: {e}")
-        conn.rollback()
         return None
 
 
@@ -78,11 +76,9 @@ def add_order(conn: connection, cur: cursor, customer_id: int, order_date: str, 
     try:
         cur.execute(query, values)
         order_id = cur.fetchone()[0]
-        conn.commit()
         return order_id
     except Exception as e:
         print(f"❌ Error inserting into orders: {e}")
-        conn.rollback()
         return None
 
 
@@ -109,11 +105,9 @@ def add_delivery(conn: connection, cur: cursor, order_id: int, delivery_date: st
     try:
         cur.execute(query, values)
         delivery_id = cur.fetchone()[0]
-        conn.commit()
         return delivery_id
     except Exception as e:
         print(f"❌ Error inserting into deliveries: {e}")
-        conn.rollback()
         return None
 
 
@@ -140,11 +134,8 @@ def update_delivery_status(conn: connection, cur: cursor, delivery_id: int, new_
         cur.execute(query, values)
         if cur.rowcount == 0:
             print(f"⚠️ No delivery found with ID {delivery_id}")
-            conn.rollback()
             return False
-        conn.commit()
         return True
     except Exception as e:
         print(f"❌ Error updating delivery status: {e}")
-        conn.rollback()
         return False

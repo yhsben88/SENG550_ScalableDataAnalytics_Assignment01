@@ -1,0 +1,54 @@
+Table 1:
+
+    Table name: payments
+
+    Describe Attributes:
+
+        payment_id (SERIAL, Primary Key): Unique identifier for each payment record.
+
+        order_id (INT, Foreign Key): References the orders(order_id) to connect a payment to a specific order.
+
+        payment_date (DATE): Date when the payment was made.
+
+        amount (NUMERIC): The amount paid.
+
+        payment_method (TEXT): Method of payment (e.g., Credit Card, PayPal, Cash).
+
+        status (TEXT): Status of the payment (e.g., Completed, Pending, Failed).
+
+    How it relates to the existing schema:
+
+        Each payment must correspond to an existing order.
+
+        Ensures that payments cannot exist without an order.
+
+    Describe Existing Table Changes:
+
+        No changes needed for orders, but payments.order_id is a foreign key referencing orders(order_id).
+Table 2:
+
+    Table name: carrier
+
+    Describe Attributes:
+
+        carrier_id (SERIAL, Primary Key): Unique identifier for each carrier (e.g., FedEx, UPS).
+
+        delivery_id (INT, Foreign Key): References deliveries(delivery_id) to link a delivery to the carrier.
+
+        name (TEXT): The name of the carrier company.
+
+        contact_number (TEXT): Contact number of the carrier.
+
+        service_type (TEXT): Type of service (e.g., Standard, Express).
+
+    How it relates to the existing schema:
+
+        Each delivery is handled by exactly one carrier.
+
+        This models real-world logistics: deliveries are carried out by external or internal shipping companies.
+
+    Describe Existing Table Changes:
+
+        Add a foreign key in carrier.delivery_id referencing deliveries(delivery_id).
+
+        No need to modify deliveries, unless you want a reverse relationship (optional carrier_id in deliveries).

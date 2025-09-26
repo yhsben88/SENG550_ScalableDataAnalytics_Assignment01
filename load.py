@@ -11,6 +11,4 @@ def load_csv_to_table(conn:connection, cur:cursor, filename, table_name, columns
                 cur.execute(query, values)
             except Exception as e:
                 print(f"❌ Error inserting into {table_name}: {e}")
-                conn.rollback()
-        conn.commit()
         print(f"✅ Loaded data into {table_name}")

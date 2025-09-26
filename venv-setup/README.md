@@ -6,58 +6,78 @@ A virtual environment keeps dependencies isolated so they don’t interfere with
 ---
 
 ## 1. Open the Project in VSCode
-1. Open **VSCode**.  
-2. Go to **File → Open Folder**.  
-3. Select the folder where your Python files (e.g., `load.py`) are located.  
+
+1. Open **VSCode**.
+2. Go to **File → Open Folder**.
+3. Select the folder where your Python files (e.g., `load.py`) are located.
 
 ---
 
 ## 2. Create a Virtual Environment
+
 Open the terminal inside VSCode and run:
 
-bash
+```bash
 # Create a virtual environment named venv
 python3 -m venv venv
+```
+
 This will create a folder called venv/ inside your project directory.
 
-##3. Activate the Virtual Environment
+## 3. Activate the Virtual Environment
+
 Activate the environment so Python and pip use this project’s interpreter.
 
 macOS/Linux:
 
-bash
-Copy code
+```bash
+# Copy code
 source venv/bin/activate
+```
+
 Windows (PowerShell):
 
-bash
-Copy code
+```bash
+# Copy code
 venv\Scripts\Activate.ps1
+```
+
 When activated, your terminal prompt will look like:
 
-ruby
-Copy code
+```ruby
+# Copy code
 (venv) yourname@computer:~/project-folder$
-##4. Install Required Packages
+```
+
+## 4. Install Required Packages
+
 With the virtual environment active, install dependencies locally:
 
-bash
-Copy code
+```bash
+# Copy code
 pip install psycopg2-binary
+```
+
 (You can add more packages here if your project needs them.)
 
-##5. Save Dependencies (Optional but Recommended)
+## 5. Save Dependencies (Optional but Recommended)
+
 To export your installed packages into a requirements.txt file:
 
-bash
-Copy code
+```bash
+# Copy code
 pip freeze > requirements.txt
+```
+
 Later, anyone can recreate the same environment with:
 
-bash
-Copy code
+```bash
+# Copy code
 pip install -r requirements.txt
-##6. Select Interpreter in VSCode
+```
+
+## 6. Select Interpreter in VSCode
+
 Press Ctrl+Shift+P (or Cmd+Shift+P on Mac).
 
 Type and select Python: Select Interpreter.

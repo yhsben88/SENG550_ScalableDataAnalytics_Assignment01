@@ -1,6 +1,5 @@
 # Introduction
 
-Overview
 You will build a simple PostgreSQL-based database system for a store. The database includes
 information about customers, orders, and deliveries. You will:
 
